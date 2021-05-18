@@ -33,7 +33,8 @@ typedef struct
 
 typedef struct
 {
-	volatile u64 CR			;
+	volatile u32 CRL		;
+	volatile u32 CRH		;
 	volatile u32 IDR		;
 	volatile u32 ODR		;
 	volatile u32 BSRR		;

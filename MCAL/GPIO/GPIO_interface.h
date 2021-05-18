@@ -43,7 +43,6 @@
 **********************************************************************/
 u8 GPIO_u8PinMode(u8 Copy_u8Port , u8 Copy_u8Pin , u8 Copy_u8Mode);
 u8 GPIO_u8PinModeWithSpeed(u8 Copy_u8Port , u8 Copy_u8Pin , u8 Copy_u8Mode , u8 Copy_u8Speed);
-u8 GPIO_u8PinSpeed(u8 Copy_u8Port , u8 Copy_u8Pin , u8 Copy_u8Speed);
 u8 GPIO_u8ReadPinValue(u8 Copy_u8Port , u8 Copy_u8Pin);
 u8 GPIO_u8SetPinValue(u8 Copy_u8Port , u8 Copy_u8Pin , u8 Copy_u8Operation);
 
