@@ -12,882 +12,153 @@
 #include "../include/MCAL/02-GPIO/GPIO_interface.h"
 #include "../include/MCAL/02-GPIO/GPIO_config.h"
 #include "../include/MCAL/02-GPIO/GPIO_private.h"
+GPIO_RegDef_t * GPIO_arrPtr [3] = {GPIOA , GPIOB , GPIOC};
 
-u8 GPIO_u8PinMode(u8 Copy_u8Port, u8 Copy_u8Pin, u8 Copy_u8Mode) {
+u8 GPIO_u8PinMode(const GPIO_PIN_CONFIG_t * Copy_strPtrConfig){
 	u8 LOC_u8ErrorState = STD_TYPES_OK;
-
-	if (Copy_u8Pin < 16) {
-		if (Copy_u8Mode >= GPIO_u8_PUSH_PULL) {
-#if GPIO_u8_MAX_OUTPUT_SPEED	==	GPIO_u8_10MHZ
-			switch (Copy_u8Port) {
-			case GPIO_u8_PORT_A:
-				if (Copy_u8Pin <= 7) {
-					SET_BIT(GPIOA->CRL, (Copy_u8Pin * 4) + 0);
-					CLR_BIT(GPIOA->CRL, (Copy_u8Pin * 4) + 1);
-				} else {
-					SET_BIT(GPIOA->CRH, ((Copy_u8Pin * 4) - 32) + 0);
-					CLR_BIT(GPIOA->CRH, ((Copy_u8Pin * 4) - 32) + 1);
-				}
-				break;
-			case GPIO_u8_PORT_B:
-				if (Copy_u8Pin <= 7) {
-					SET_BIT(GPIOB->CRL, (Copy_u8Pin * 4) + 0);
-					CLR_BIT(GPIOB->CRL, (Copy_u8Pin * 4) + 1);
-				} else {
-					SET_BIT(GPIOB->CRH, ((Copy_u8Pin * 4) - 32) + 0);
-					CLR_BIT(GPIOB->CRH, ((Copy_u8Pin * 4) - 32) + 1);
-				}
-				break;
-			case GPIO_u8_PORT_C:
-				if (Copy_u8Pin <= 7) {
-					SET_BIT(GPIOC->CRL, (Copy_u8Pin * 4) + 0);
-					CLR_BIT(GPIOC->CRL, (Copy_u8Pin * 4) + 1);
-				} else {
-					SET_BIT(GPIOC->CRH, ((Copy_u8Pin * 4) - 32) + 0);
-					CLR_BIT(GPIOC->CRH, ((Copy_u8Pin * 4) - 32) + 1);
-				}
-				break;
-			default:
-				LOC_u8ErrorState = STD_TYPES_NOK;
-				break;
+	u8 LOC_u8PinMode = 0;
+	u8 LOC_u8PinNumber = 0;
+	if (Copy_strPtrConfig != NULL){
+		if((Copy_strPtrConfig ->u8PortId <= GPIO_u8_PORT_C) && (Copy_strPtrConfig->u8PinId <= GPIO_u8_PIN_15)){
+			LOC_u8PinMode = Copy_strPtrConfig->u8PinMode;
+			LOC_u8PinNumber = Copy_strPtrConfig->u8PinId;
+			if(Copy_strPtrConfig->u8PinMode == GPIO_u8_INPUT_PULL_UP){
+				SET_BIT((GPIO_arrPtr[Copy_strPtrConfig->u8PortId]->ODR) , (Copy_strPtrConfig->u8PinId));
+				LOC_u8PinMode = GPIO_u8_INPUT_PULL_UP_DOWN ;
 			}
-#elif GPIO_u8_MAX_OUTPUT_SPEED	==	GPIO_u8_2MHZ
 
-			switch (Copy_u8Port) {
-				case GPIO_u8_PORT_A:
-				if (Copy_u8Pin <= 7) {
-					CLR_BIT(GPIOA->CRL , (Copy_u8Pin * 4) + 0 );
-					SET_BIT(GPIOA->CRL , (Copy_u8Pin * 4) + 1 );
-				}
-				else {
-					CLR_BIT(GPIOA->CRH, ((Copy_u8Pin * 4) - 32) + 0);
-					SET_BIT(GPIOA->CRH, ((Copy_u8Pin * 4) - 32) + 1);
-				}
-				break;
-				case GPIO_u8_PORT_B:
-				if (Copy_u8Pin <= 7) {
-					CLR_BIT(GPIOB->CRL , (Copy_u8Pin * 4) + 0 );
-					SET_BIT(GPIOB->CRL , (Copy_u8Pin * 4) + 1 );
-				}
-				else {
-					CLR_BIT(GPIOB->CRH, ((Copy_u8Pin * 4) - 32) + 0);
-					SET_BIT(GPIOB->CRH, ((Copy_u8Pin * 4) - 32) + 1);
-				}
-				break;
-				case GPIO_u8_PORT_C:
-				if (Copy_u8Pin <= 7) {
-					CLR_BIT(GPIOC->CRL , (Copy_u8Pin * 4) + 0 );
-					SET_BIT(GPIOC->CRL , (Copy_u8Pin * 4) + 1 );
-				}
-				else {
-					CLR_BIT(GPIOC->CRH, ((Copy_u8Pin * 4) - 32) + 0);
-					SET_BIT(GPIOC->CRH, ((Copy_u8Pin * 4) - 32) + 1);
-				}
-				break;
-				default:
-				LOC_u8ErrorState = STD_TYPES_NOK;
-				break;
+			if(Copy_strPtrConfig->u8PinId <= GPIO_u8_PIN_07){
+				GPIO_arrPtr[Copy_strPtrConfig->u8PortId]->CRL &= ~((0b1111 << (4 * LOC_u8PinNumber)));
+				GPIO_arrPtr[Copy_strPtrConfig->u8PortId]->CRL |=  ((LOC_u8PinMode << (4 * LOC_u8PinNumber)));
 			}
-#elif GPIO_u8_MAX_OUTPUT_SPEED	==	GPIO_u8_50MHZ
-
-			switch (Copy_u8Port) {
-				case GPIO_u8_PORT_A:
-				if (Copy_u8Pin <= 7) {
-					SET_BIT(GPIOA->CRL , (Copy_u8Pin * 4) + 0 );
-					SET_BIT(GPIOA->CRL , (Copy_u8Pin * 4) + 1 );
-				}
-				else {
-					SET_BIT(GPIOA->CRH, ((Copy_u8Pin * 4) - 32) + 0);
-					SET_BIT(GPIOA->CRH, ((Copy_u8Pin * 4) - 32) + 1);
-				}
-
-				break;
-				case GPIO_u8_PORT_B:
-				if (Copy_u8Pin <= 7) {
-					SET_BIT(GPIOB->CRL , (Copy_u8Pin * 4) + 0 );
-					SET_BIT(GPIOB->CRL , (Copy_u8Pin * 4) + 1 );
-				}
-				else {
-					SET_BIT(GPIOB->CRH, ((Copy_u8Pin * 4) - 32) + 0);
-					SET_BIT(GPIOB->CRH, ((Copy_u8Pin * 4) - 32) + 1);
-				}
-				break;
-				case GPIO_u8_PORT_C:
-				if (Copy_u8Pin <= 7) {
-					SET_BIT(GPIOC->CRL , (Copy_u8Pin * 4) + 0 );
-					SET_BIT(GPIOC->CRL , (Copy_u8Pin * 4) + 1 );
-				}
-				else {
-					SET_BIT(GPIOC->CRH, ((Copy_u8Pin * 4) - 32) + 0);
-					SET_BIT(GPIOC->CRH, ((Copy_u8Pin * 4) - 32) + 1);
-				}
-				break;
-				default:
-				LOC_u8ErrorState = STD_TYPES_NOK;
-				break;
+			else{
+				LOC_u8PinNumber -= GPIO_u8_PIN_08;
+				GPIO_arrPtr[Copy_strPtrConfig->u8PortId]->CRH &= ~((0b1111 << (4 * LOC_u8PinNumber)));
+				GPIO_arrPtr[Copy_strPtrConfig->u8PortId]->CRH |=  ((LOC_u8PinMode << (4 * LOC_u8PinNumber)));
 			}
-#endif
 		}
-		switch (Copy_u8Mode) {
-
-		case GPIO_u8_ANALOG_MODE:
-			switch (Copy_u8Port) {
-			case GPIO_u8_PORT_A:
-				if (Copy_u8Pin <= 7) {
-					CLR_BIT(GPIOA->CRL, (Copy_u8Pin * 4) + 0);
-					CLR_BIT(GPIOA->CRL, (Copy_u8Pin * 4) + 1);
-					CLR_BIT(GPIOA->CRL, (Copy_u8Pin * 4) + 2);
-					CLR_BIT(GPIOA->CRL, (Copy_u8Pin * 4) + 3);
-				} else {
-					CLR_BIT(GPIOA->CRH, ((Copy_u8Pin * 4) - 32) + 0);
-					CLR_BIT(GPIOA->CRH, ((Copy_u8Pin * 4) - 32) + 1);
-					CLR_BIT(GPIOA->CRH, ((Copy_u8Pin * 4) - 32) + 2);
-					CLR_BIT(GPIOA->CRH, ((Copy_u8Pin * 4) - 32) + 3);
-				}
-				break;
-			case GPIO_u8_PORT_B:
-				if (Copy_u8Pin <= 7) {
-					CLR_BIT(GPIOB->CRL, (Copy_u8Pin * 4) + 0);
-					CLR_BIT(GPIOB->CRL, (Copy_u8Pin * 4) + 1);
-					CLR_BIT(GPIOB->CRL, (Copy_u8Pin * 4) + 2);
-					CLR_BIT(GPIOB->CRL, (Copy_u8Pin * 4) + 3);
-				} else {
-					CLR_BIT(GPIOB->CRH, ((Copy_u8Pin * 4) - 32) + 0);
-					CLR_BIT(GPIOB->CRH, ((Copy_u8Pin * 4) - 32) + 1);
-					CLR_BIT(GPIOB->CRH, ((Copy_u8Pin * 4) - 32) + 2);
-					CLR_BIT(GPIOB->CRH, ((Copy_u8Pin * 4) - 32) + 3);
-				}
-				break;
-			case GPIO_u8_PORT_C:
-				if (Copy_u8Pin <= 7) {
-					CLR_BIT(GPIOC->CRL, (Copy_u8Pin * 4) + 0);
-					CLR_BIT(GPIOC->CRL, (Copy_u8Pin * 4) + 1);
-					CLR_BIT(GPIOC->CRL, (Copy_u8Pin * 4) + 2);
-					CLR_BIT(GPIOC->CRL, (Copy_u8Pin * 4) + 3);
-				} else {
-					CLR_BIT(GPIOC->CRH, ((Copy_u8Pin * 4) - 32) + 0);
-					CLR_BIT(GPIOC->CRH, ((Copy_u8Pin * 4) - 32) + 1);
-					CLR_BIT(GPIOC->CRH, ((Copy_u8Pin * 4) - 32) + 2);
-					CLR_BIT(GPIOC->CRH, ((Copy_u8Pin * 4) - 32) + 3);
-				}
-				break;
-			default:
-				LOC_u8ErrorState = STD_TYPES_NOK;
-				break;
-			}
-			break;
-
-		case GPIO_u8_FLOATING_MODE:
-			switch (Copy_u8Port) {
-			case GPIO_u8_PORT_A:
-				if (Copy_u8Pin <= 7) {
-					CLR_BIT(GPIOA->CRL, (Copy_u8Pin * 4) + 0);
-					CLR_BIT(GPIOA->CRL, (Copy_u8Pin * 4) + 1);
-					SET_BIT(GPIOA->CRL, (Copy_u8Pin * 4) + 2);
-					CLR_BIT(GPIOA->CRL, (Copy_u8Pin * 4) + 3);
-				} else {
-					CLR_BIT(GPIOA->CRH, ((Copy_u8Pin * 4) - 32) + 0);
-					CLR_BIT(GPIOA->CRH, ((Copy_u8Pin * 4) - 32) + 1);
-					SET_BIT(GPIOA->CRH, ((Copy_u8Pin * 4) - 32) + 2);
-					CLR_BIT(GPIOA->CRH, ((Copy_u8Pin * 4) - 32) + 3);
-				}
-				break;
-			case GPIO_u8_PORT_B:
-				if (Copy_u8Pin <= 7) {
-					CLR_BIT(GPIOB->CRL, (Copy_u8Pin * 4) + 0);
-					CLR_BIT(GPIOB->CRL, (Copy_u8Pin * 4) + 1);
-					SET_BIT(GPIOB->CRL, (Copy_u8Pin * 4) + 2);
-					CLR_BIT(GPIOB->CRL, (Copy_u8Pin * 4) + 3);
-				} else {
-					CLR_BIT(GPIOB->CRH, ((Copy_u8Pin * 4) - 32) + 0);
-					CLR_BIT(GPIOB->CRH, ((Copy_u8Pin * 4) - 32) + 1);
-					SET_BIT(GPIOB->CRH, ((Copy_u8Pin * 4) - 32) + 2);
-					CLR_BIT(GPIOB->CRH, ((Copy_u8Pin * 4) - 32) + 3);
-				}
-				break;
-			case GPIO_u8_PORT_C:
-				if (Copy_u8Pin <= 7) {
-					CLR_BIT(GPIOC->CRL, (Copy_u8Pin * 4) + 0);
-					CLR_BIT(GPIOC->CRL, (Copy_u8Pin * 4) + 1);
-					SET_BIT(GPIOC->CRL, (Copy_u8Pin * 4) + 2);
-					CLR_BIT(GPIOC->CRL, (Copy_u8Pin * 4) + 3);
-				} else {
-					CLR_BIT(GPIOC->CRH, ((Copy_u8Pin * 4) - 32) + 0);
-					CLR_BIT(GPIOC->CRH, ((Copy_u8Pin * 4) - 32) + 1);
-					SET_BIT(GPIOC->CRH, ((Copy_u8Pin * 4) - 32) + 2);
-					CLR_BIT(GPIOC->CRH, ((Copy_u8Pin * 4) - 32) + 3);
-				}
-				break;
-			default:
-				LOC_u8ErrorState = STD_TYPES_NOK;
-				break;
-			}
-			break;
-
-		case GPIO_u8_PULLUP_PULLDOWN_MODE:
-			switch (Copy_u8Port) {
-			case GPIO_u8_PORT_A:
-				if (Copy_u8Pin <= 7) {
-					CLR_BIT(GPIOA->CRL, (Copy_u8Pin * 4) + 0);
-					CLR_BIT(GPIOA->CRL, (Copy_u8Pin * 4) + 1);
-					CLR_BIT(GPIOA->CRL, (Copy_u8Pin * 4) + 2);
-					SET_BIT(GPIOA->CRL, (Copy_u8Pin * 4) + 3);
-				} else {
-					CLR_BIT(GPIOA->CRH, ((Copy_u8Pin * 4) - 32) + 0);
-					CLR_BIT(GPIOA->CRH, ((Copy_u8Pin * 4) - 32) + 1);
-					CLR_BIT(GPIOA->CRH, ((Copy_u8Pin * 4) - 32) + 2);
-					SET_BIT(GPIOA->CRH, ((Copy_u8Pin * 4) - 32) + 3);
-				}
-				break;
-			case GPIO_u8_PORT_B:
-				if (Copy_u8Pin <= 7) {
-					CLR_BIT(GPIOB->CRL, (Copy_u8Pin * 4) + 0);
-					CLR_BIT(GPIOB->CRL, (Copy_u8Pin * 4) + 1);
-					CLR_BIT(GPIOB->CRL, (Copy_u8Pin * 4) + 2);
-					SET_BIT(GPIOB->CRL, (Copy_u8Pin * 4) + 3);
-				} else {
-					CLR_BIT(GPIOB->CRH, ((Copy_u8Pin * 4) - 32) + 0);
-					CLR_BIT(GPIOB->CRH, ((Copy_u8Pin * 4) - 32) + 1);
-					CLR_BIT(GPIOB->CRH, ((Copy_u8Pin * 4) - 32) + 2);
-					SET_BIT(GPIOB->CRH, ((Copy_u8Pin * 4) - 32) + 3);
-				}
-				break;
-			case GPIO_u8_PORT_C:
-				if (Copy_u8Pin <= 7) {
-					CLR_BIT(GPIOC->CRL, (Copy_u8Pin * 4) + 0);
-					CLR_BIT(GPIOC->CRL, (Copy_u8Pin * 4) + 1);
-					CLR_BIT(GPIOC->CRL, (Copy_u8Pin * 4) + 2);
-					SET_BIT(GPIOC->CRL, (Copy_u8Pin * 4) + 3);
-				} else {
-					CLR_BIT(GPIOC->CRH, ((Copy_u8Pin * 4) - 32) + 0);
-					CLR_BIT(GPIOC->CRH, ((Copy_u8Pin * 4) - 32) + 1);
-					CLR_BIT(GPIOC->CRH, ((Copy_u8Pin * 4) - 32) + 2);
-					SET_BIT(GPIOC->CRH, ((Copy_u8Pin * 4) - 32) + 3);
-				}
-				break;
-			default:
-				LOC_u8ErrorState = STD_TYPES_NOK;
-				break;
-			}
-			break;
-
-		case GPIO_u8_PUSH_PULL:
-			switch (Copy_u8Port) {
-			case GPIO_u8_PORT_A:
-				if (Copy_u8Pin <= 7) {
-					CLR_BIT(GPIOA->CRL, (Copy_u8Pin * 4) + 2);
-					CLR_BIT(GPIOA->CRL, (Copy_u8Pin * 4) + 3);
-				} else {
-					CLR_BIT(GPIOA->CRH, ((Copy_u8Pin * 4) - 32) + 2);
-					CLR_BIT(GPIOA->CRH, ((Copy_u8Pin * 4) - 32) + 3);
-				}
-				break;
-			case GPIO_u8_PORT_B:
-				if (Copy_u8Pin <= 7) {
-					CLR_BIT(GPIOB->CRL, (Copy_u8Pin * 4) + 2);
-					CLR_BIT(GPIOB->CRL, (Copy_u8Pin * 4) + 3);
-				} else {
-					CLR_BIT(GPIOB->CRH, ((Copy_u8Pin * 4) - 32) + 2);
-					CLR_BIT(GPIOB->CRH, ((Copy_u8Pin * 4) - 32) + 3);
-				}
-				break;
-			case GPIO_u8_PORT_C:
-				if (Copy_u8Pin <= 7) {
-					CLR_BIT(GPIOC->CRL, (Copy_u8Pin * 4) + 2);
-					CLR_BIT(GPIOC->CRL, (Copy_u8Pin * 4) + 3);
-				} else {
-					CLR_BIT(GPIOC->CRH, ((Copy_u8Pin * 4) - 32) + 2);
-					CLR_BIT(GPIOC->CRH, ((Copy_u8Pin * 4) - 32) + 3);
-				}
-				break;
-			default:
-				LOC_u8ErrorState = STD_TYPES_NOK;
-				break;
-			}
-			break;
-
-		case GPIO_u8_OPEN_DRIAN:
-			switch (Copy_u8Port) {
-			case GPIO_u8_PORT_A:
-				if (Copy_u8Pin <= 7) {
-					SET_BIT(GPIOA->CRL, (Copy_u8Pin * 4) + 2);
-					CLR_BIT(GPIOA->CRL, (Copy_u8Pin * 4) + 3);
-				} else {
-					SET_BIT(GPIOA->CRH, ((Copy_u8Pin * 4) - 32) + 2);
-					CLR_BIT(GPIOA->CRH, ((Copy_u8Pin * 4) - 32) + 3);
-				}
-				break;
-			case GPIO_u8_PORT_B:
-				if (Copy_u8Pin <= 7) {
-					SET_BIT(GPIOB->CRL, (Copy_u8Pin * 4) + 2);
-					CLR_BIT(GPIOB->CRL, (Copy_u8Pin * 4) + 3);
-				} else {
-					SET_BIT(GPIOB->CRH, ((Copy_u8Pin * 4) - 32) + 2);
-					CLR_BIT(GPIOB->CRH, ((Copy_u8Pin * 4) - 32) + 3);
-				}
-				break;
-			case GPIO_u8_PORT_C:
-				if (Copy_u8Pin <= 7) {
-					SET_BIT(GPIOC->CRL, (Copy_u8Pin * 4) + 2);
-					CLR_BIT(GPIOC->CRL, (Copy_u8Pin * 4) + 3);
-				} else {
-					SET_BIT(GPIOC->CRH, ((Copy_u8Pin * 4) - 32) + 2);
-					CLR_BIT(GPIOC->CRH, ((Copy_u8Pin * 4) - 32) + 3);
-				}
-				break;
-			default:
-				LOC_u8ErrorState = STD_TYPES_NOK;
-				break;
-			}
-			break;
-
-		case GPIO_u8_ALTERNATE_PUSH_PULL:
-			switch (Copy_u8Port) {
-			case GPIO_u8_PORT_A:
-				if (Copy_u8Pin <= 7) {
-					CLR_BIT(GPIOA->CRL, (Copy_u8Pin * 4) + 2);
-					SET_BIT(GPIOA->CRL, (Copy_u8Pin * 4) + 3);
-				} else {
-					CLR_BIT(GPIOA->CRH, ((Copy_u8Pin * 4) - 32) + 2);
-					SET_BIT(GPIOA->CRH, ((Copy_u8Pin * 4) - 32) + 3);
-				}
-				break;
-			case GPIO_u8_PORT_B:
-				if (Copy_u8Pin <= 7) {
-					CLR_BIT(GPIOB->CRL, (Copy_u8Pin * 4) + 2);
-					SET_BIT(GPIOB->CRL, (Copy_u8Pin * 4) + 3);
-				} else {
-					CLR_BIT(GPIOB->CRH, ((Copy_u8Pin * 4) - 32) + 2);
-					SET_BIT(GPIOB->CRH, ((Copy_u8Pin * 4) - 32) + 3);
-				}
-				break;
-			case GPIO_u8_PORT_C:
-				if (Copy_u8Pin <= 7) {
-					CLR_BIT(GPIOC->CRL, (Copy_u8Pin * 4) + 2);
-					SET_BIT(GPIOC->CRL, (Copy_u8Pin * 4) + 3);
-				} else {
-					CLR_BIT(GPIOC->CRH, ((Copy_u8Pin * 4) - 32) + 2);
-					SET_BIT(GPIOC->CRH, ((Copy_u8Pin * 4) - 32) + 3);
-				}
-				break;
-			default:
-				LOC_u8ErrorState = STD_TYPES_NOK;
-				break;
-			}
-			break;
-
-		case GPIO_u8_ALTERNATE_OPEN_DRIAN:
-			switch (Copy_u8Port) {
-			case GPIO_u8_PORT_A:
-				if (Copy_u8Pin <= 7) {
-					SET_BIT(GPIOA->CRL, (Copy_u8Pin * 4) + 2);
-					SET_BIT(GPIOA->CRL, (Copy_u8Pin * 4) + 3);
-				} else {
-					SET_BIT(GPIOA->CRH, ((Copy_u8Pin * 4) - 32) + 2);
-					SET_BIT(GPIOA->CRH, ((Copy_u8Pin * 4) - 32) + 3);
-				}
-				break;
-			case GPIO_u8_PORT_B:
-				if (Copy_u8Pin <= 7) {
-					SET_BIT(GPIOB->CRL, (Copy_u8Pin * 4) + 2);
-					SET_BIT(GPIOB->CRL, (Copy_u8Pin * 4) + 3);
-				} else {
-					SET_BIT(GPIOB->CRH, ((Copy_u8Pin * 4) - 32) + 2);
-					SET_BIT(GPIOB->CRH, ((Copy_u8Pin * 4) - 32) + 3);
-				}
-				break;
-			case GPIO_u8_PORT_C:
-				if (Copy_u8Pin <= 7) {
-					SET_BIT(GPIOC->CRL, (Copy_u8Pin * 4) + 2);
-					SET_BIT(GPIOC->CRL, (Copy_u8Pin * 4) + 3);
-				} else {
-					SET_BIT(GPIOC->CRH, ((Copy_u8Pin * 4) - 32) + 2);
-					SET_BIT(GPIOC->CRH, ((Copy_u8Pin * 4) - 32) + 3);
-				}
-				break;
-			default:
-				LOC_u8ErrorState = STD_TYPES_NOK;
-				break;
-			}
-			break;
-
+		else{
+			LOC_u8ErrorState = STD_TYPES_NOK;
 		}
 	}
-	return LOC_u8ErrorState;
-
-}
-
-u8 GPIO_u8PinModeWithSpeed(u8 Copy_u8Port, u8 Copy_u8Pin, u8 Copy_u8Mode,
-		u8 Copy_u8Speed) {
-	u8 LOC_u8ErrorState = STD_TYPES_OK;
-
-	if (Copy_u8Pin < 16) {
-		if (Copy_u8Mode >= GPIO_u8_PUSH_PULL) {
-			switch (Copy_u8Speed) {
-			case GPIO_u8_10MHZ:
-				switch (Copy_u8Port) {
-				case GPIO_u8_PORT_A:
-					if (Copy_u8Pin <= 7) {
-						SET_BIT(GPIOA->CRL, (Copy_u8Pin * 4) + 0);
-						CLR_BIT(GPIOA->CRL, (Copy_u8Pin * 4) + 1);
-					} else {
-						SET_BIT(GPIOA->CRH, ((Copy_u8Pin * 4) - 32) + 0);
-						CLR_BIT(GPIOA->CRH, ((Copy_u8Pin * 4) - 32) + 1);
-					}
-					break;
-				case GPIO_u8_PORT_B:
-					if (Copy_u8Pin <= 7) {
-						SET_BIT(GPIOB->CRL, (Copy_u8Pin * 4) + 0);
-						CLR_BIT(GPIOB->CRL, (Copy_u8Pin * 4) + 1);
-					} else {
-						SET_BIT(GPIOB->CRH, ((Copy_u8Pin * 4) - 32) + 0);
-						CLR_BIT(GPIOB->CRH, ((Copy_u8Pin * 4) - 32) + 1);
-					}
-					break;
-				case GPIO_u8_PORT_C:
-					if (Copy_u8Pin <= 7) {
-						SET_BIT(GPIOC->CRL, (Copy_u8Pin * 4) + 0);
-						CLR_BIT(GPIOC->CRL, (Copy_u8Pin * 4) + 1);
-					} else {
-						SET_BIT(GPIOC->CRH, ((Copy_u8Pin * 4) - 32) + 0);
-						CLR_BIT(GPIOC->CRH, ((Copy_u8Pin * 4) - 32) + 1);
-					}
-					break;
-				default:
-					LOC_u8ErrorState = STD_TYPES_NOK;
-					break;
-				}
-				break;
-			case GPIO_u8_2MHZ:
-				switch (Copy_u8Port) {
-					case GPIO_u8_PORT_A:
-					if (Copy_u8Pin <= 7) {
-						CLR_BIT(GPIOA->CRL , (Copy_u8Pin * 4) + 0 );
-						SET_BIT(GPIOA->CRL , (Copy_u8Pin * 4) + 1 );
-					}
-					else {
-						CLR_BIT(GPIOA->CRH, ((Copy_u8Pin * 4) - 32) + 0);
-						SET_BIT(GPIOA->CRH, ((Copy_u8Pin * 4) - 32) + 1);
-					}
-					break;
-					case GPIO_u8_PORT_B:
-					if (Copy_u8Pin <= 7) {
-						CLR_BIT(GPIOB->CRL , (Copy_u8Pin * 4) + 0 );
-						SET_BIT(GPIOB->CRL , (Copy_u8Pin * 4) + 1 );
-					}
-					else {
-						CLR_BIT(GPIOB->CRH, ((Copy_u8Pin * 4) - 32) + 0);
-						SET_BIT(GPIOB->CRH, ((Copy_u8Pin * 4) - 32) + 1);
-					}
-					break;
-					case GPIO_u8_PORT_C:
-					if (Copy_u8Pin <= 7) {
-						CLR_BIT(GPIOC->CRL , (Copy_u8Pin * 4) + 0 );
-						SET_BIT(GPIOC->CRL , (Copy_u8Pin * 4) + 1 );
-					}
-					else {
-						CLR_BIT(GPIOC->CRH, ((Copy_u8Pin * 4) - 32) + 0);
-						SET_BIT(GPIOC->CRH, ((Copy_u8Pin * 4) - 32) + 1);
-					}
-					break;
-					default:
-					LOC_u8ErrorState = STD_TYPES_NOK;
-					break;
-				}
-				break;
-			case GPIO_u8_50MHZ:
-
-				switch (Copy_u8Port) {
-					case GPIO_u8_PORT_A:
-					if (Copy_u8Pin <= 7) {
-						SET_BIT(GPIOA->CRL , (Copy_u8Pin * 4) + 0 );
-						SET_BIT(GPIOA->CRL , (Copy_u8Pin * 4) + 1 );
-					}
-					else {
-						SET_BIT(GPIOA->CRH, ((Copy_u8Pin * 4) - 32) + 0);
-						SET_BIT(GPIOA->CRH, ((Copy_u8Pin * 4) - 32) + 1);
-					}
-
-					break;
-					case GPIO_u8_PORT_B:
-					if (Copy_u8Pin <= 7) {
-						SET_BIT(GPIOB->CRL , (Copy_u8Pin * 4) + 0 );
-						SET_BIT(GPIOB->CRL , (Copy_u8Pin * 4) + 1 );
-					}
-					else {
-						SET_BIT(GPIOB->CRH, ((Copy_u8Pin * 4) - 32) + 0);
-						SET_BIT(GPIOB->CRH, ((Copy_u8Pin * 4) - 32) + 1);
-					}
-					break;
-					case GPIO_u8_PORT_C:
-					if (Copy_u8Pin <= 7) {
-						SET_BIT(GPIOC->CRL , (Copy_u8Pin * 4) + 0 );
-						SET_BIT(GPIOC->CRL , (Copy_u8Pin * 4) + 1 );
-					}
-					else {
-						SET_BIT(GPIOC->CRH, ((Copy_u8Pin * 4) - 32) + 0);
-						SET_BIT(GPIOC->CRH, ((Copy_u8Pin * 4) - 32) + 1);
-					}
-					break;
-					default:
-					LOC_u8ErrorState = STD_TYPES_NOK;
-					break;
-				}
-				break;
-			default:
-				LOC_u8ErrorState = STD_TYPES_NOK;
-				break;
-			}
-		}
-
-		switch (Copy_u8Mode) {
-
-		case GPIO_u8_ANALOG_MODE:
-			switch (Copy_u8Port) {
-			case GPIO_u8_PORT_A:
-				if (Copy_u8Pin <= 7) {
-					CLR_BIT(GPIOA->CRL, (Copy_u8Pin * 4) + 0);
-					CLR_BIT(GPIOA->CRL, (Copy_u8Pin * 4) + 1);
-					CLR_BIT(GPIOA->CRL, (Copy_u8Pin * 4) + 2);
-					CLR_BIT(GPIOA->CRL, (Copy_u8Pin * 4) + 3);
-				} else {
-					CLR_BIT(GPIOA->CRH, ((Copy_u8Pin * 4) - 32) + 0);
-					CLR_BIT(GPIOA->CRH, ((Copy_u8Pin * 4) - 32) + 1);
-					CLR_BIT(GPIOA->CRH, ((Copy_u8Pin * 4) - 32) + 2);
-					CLR_BIT(GPIOA->CRH, ((Copy_u8Pin * 4) - 32) + 3);
-				}
-				break;
-			case GPIO_u8_PORT_B:
-				if (Copy_u8Pin <= 7) {
-					CLR_BIT(GPIOB->CRL, (Copy_u8Pin * 4) + 0);
-					CLR_BIT(GPIOB->CRL, (Copy_u8Pin * 4) + 1);
-					CLR_BIT(GPIOB->CRL, (Copy_u8Pin * 4) + 2);
-					CLR_BIT(GPIOB->CRL, (Copy_u8Pin * 4) + 3);
-				} else {
-					CLR_BIT(GPIOB->CRH, ((Copy_u8Pin * 4) - 32) + 0);
-					CLR_BIT(GPIOB->CRH, ((Copy_u8Pin * 4) - 32) + 1);
-					CLR_BIT(GPIOB->CRH, ((Copy_u8Pin * 4) - 32) + 2);
-					CLR_BIT(GPIOB->CRH, ((Copy_u8Pin * 4) - 32) + 3);
-				}
-				break;
-			case GPIO_u8_PORT_C:
-				if (Copy_u8Pin <= 7) {
-					CLR_BIT(GPIOC->CRL, (Copy_u8Pin * 4) + 0);
-					CLR_BIT(GPIOC->CRL, (Copy_u8Pin * 4) + 1);
-					CLR_BIT(GPIOC->CRL, (Copy_u8Pin * 4) + 2);
-					CLR_BIT(GPIOC->CRL, (Copy_u8Pin * 4) + 3);
-				} else {
-					CLR_BIT(GPIOC->CRH, ((Copy_u8Pin * 4) - 32) + 0);
-					CLR_BIT(GPIOC->CRH, ((Copy_u8Pin * 4) - 32) + 1);
-					CLR_BIT(GPIOC->CRH, ((Copy_u8Pin * 4) - 32) + 2);
-					CLR_BIT(GPIOC->CRH, ((Copy_u8Pin * 4) - 32) + 3);
-				}
-				break;
-			default:
-				LOC_u8ErrorState = STD_TYPES_NOK;
-				break;
-			}
-			break;
-
-		case GPIO_u8_FLOATING_MODE:
-			switch (Copy_u8Port) {
-			case GPIO_u8_PORT_A:
-				if (Copy_u8Pin <= 7) {
-					CLR_BIT(GPIOA->CRL, (Copy_u8Pin * 4) + 0);
-					CLR_BIT(GPIOA->CRL, (Copy_u8Pin * 4) + 1);
-					SET_BIT(GPIOA->CRL, (Copy_u8Pin * 4) + 2);
-					CLR_BIT(GPIOA->CRL, (Copy_u8Pin * 4) + 3);
-				} else {
-					CLR_BIT(GPIOA->CRH, ((Copy_u8Pin * 4) - 32) + 0);
-					CLR_BIT(GPIOA->CRH, ((Copy_u8Pin * 4) - 32) + 1);
-					SET_BIT(GPIOA->CRH, ((Copy_u8Pin * 4) - 32) + 2);
-					CLR_BIT(GPIOA->CRH, ((Copy_u8Pin * 4) - 32) + 3);
-				}
-				break;
-			case GPIO_u8_PORT_B:
-				if (Copy_u8Pin <= 7) {
-					CLR_BIT(GPIOB->CRL, (Copy_u8Pin * 4) + 0);
-					CLR_BIT(GPIOB->CRL, (Copy_u8Pin * 4) + 1);
-					SET_BIT(GPIOB->CRL, (Copy_u8Pin * 4) + 2);
-					CLR_BIT(GPIOB->CRL, (Copy_u8Pin * 4) + 3);
-				} else {
-					CLR_BIT(GPIOB->CRH, ((Copy_u8Pin * 4) - 32) + 0);
-					CLR_BIT(GPIOB->CRH, ((Copy_u8Pin * 4) - 32) + 1);
-					SET_BIT(GPIOB->CRH, ((Copy_u8Pin * 4) - 32) + 2);
-					CLR_BIT(GPIOB->CRH, ((Copy_u8Pin * 4) - 32) + 3);
-				}
-				break;
-			case GPIO_u8_PORT_C:
-				if (Copy_u8Pin <= 7) {
-					CLR_BIT(GPIOC->CRL, (Copy_u8Pin * 4) + 0);
-					CLR_BIT(GPIOC->CRL, (Copy_u8Pin * 4) + 1);
-					SET_BIT(GPIOC->CRL, (Copy_u8Pin * 4) + 2);
-					CLR_BIT(GPIOC->CRL, (Copy_u8Pin * 4) + 3);
-				} else {
-					CLR_BIT(GPIOC->CRH, ((Copy_u8Pin * 4) - 32) + 0);
-					CLR_BIT(GPIOC->CRH, ((Copy_u8Pin * 4) - 32) + 1);
-					SET_BIT(GPIOC->CRH, ((Copy_u8Pin * 4) - 32) + 2);
-					CLR_BIT(GPIOC->CRH, ((Copy_u8Pin * 4) - 32) + 3);
-				}
-				break;
-			default:
-				LOC_u8ErrorState = STD_TYPES_NOK;
-				break;
-			}
-			break;
-
-		case GPIO_u8_PULLUP_PULLDOWN_MODE:
-			switch (Copy_u8Port) {
-			case GPIO_u8_PORT_A:
-				if (Copy_u8Pin <= 7) {
-					CLR_BIT(GPIOA->CRL, (Copy_u8Pin * 4) + 0);
-					CLR_BIT(GPIOA->CRL, (Copy_u8Pin * 4) + 1);
-					CLR_BIT(GPIOA->CRL, (Copy_u8Pin * 4) + 2);
-					SET_BIT(GPIOA->CRL, (Copy_u8Pin * 4) + 3);
-				} else {
-					CLR_BIT(GPIOA->CRH, ((Copy_u8Pin * 4) - 32) + 0);
-					CLR_BIT(GPIOA->CRH, ((Copy_u8Pin * 4) - 32) + 1);
-					CLR_BIT(GPIOA->CRH, ((Copy_u8Pin * 4) - 32) + 2);
-					SET_BIT(GPIOA->CRH, ((Copy_u8Pin * 4) - 32) + 3);
-				}
-				break;
-			case GPIO_u8_PORT_B:
-				if (Copy_u8Pin <= 7) {
-					CLR_BIT(GPIOB->CRL, (Copy_u8Pin * 4) + 0);
-					CLR_BIT(GPIOB->CRL, (Copy_u8Pin * 4) + 1);
-					CLR_BIT(GPIOB->CRL, (Copy_u8Pin * 4) + 2);
-					SET_BIT(GPIOB->CRL, (Copy_u8Pin * 4) + 3);
-				} else {
-					CLR_BIT(GPIOB->CRH, ((Copy_u8Pin * 4) - 32) + 0);
-					CLR_BIT(GPIOB->CRH, ((Copy_u8Pin * 4) - 32) + 1);
-					CLR_BIT(GPIOB->CRH, ((Copy_u8Pin * 4) - 32) + 2);
-					SET_BIT(GPIOB->CRH, ((Copy_u8Pin * 4) - 32) + 3);
-				}
-				break;
-			case GPIO_u8_PORT_C:
-				if (Copy_u8Pin <= 7) {
-					CLR_BIT(GPIOC->CRL, (Copy_u8Pin * 4) + 0);
-					CLR_BIT(GPIOC->CRL, (Copy_u8Pin * 4) + 1);
-					CLR_BIT(GPIOC->CRL, (Copy_u8Pin * 4) + 2);
-					SET_BIT(GPIOC->CRL, (Copy_u8Pin * 4) + 3);
-				} else {
-					CLR_BIT(GPIOC->CRH, ((Copy_u8Pin * 4) - 32) + 0);
-					CLR_BIT(GPIOC->CRH, ((Copy_u8Pin * 4) - 32) + 1);
-					CLR_BIT(GPIOC->CRH, ((Copy_u8Pin * 4) - 32) + 2);
-					SET_BIT(GPIOC->CRH, ((Copy_u8Pin * 4) - 32) + 3);
-				}
-				break;
-			default:
-				LOC_u8ErrorState = STD_TYPES_NOK;
-				break;
-			}
-			break;
-
-		case GPIO_u8_PUSH_PULL:
-			switch (Copy_u8Port) {
-			case GPIO_u8_PORT_A:
-				if (Copy_u8Pin <= 7) {
-					CLR_BIT(GPIOA->CRL, (Copy_u8Pin * 4) + 2);
-					CLR_BIT(GPIOA->CRL, (Copy_u8Pin * 4) + 3);
-				} else {
-					CLR_BIT(GPIOA->CRH, ((Copy_u8Pin * 4) - 32) + 2);
-					CLR_BIT(GPIOA->CRH, ((Copy_u8Pin * 4) - 32) + 3);
-				}
-				break;
-			case GPIO_u8_PORT_B:
-				if (Copy_u8Pin <= 7) {
-					CLR_BIT(GPIOB->CRL, (Copy_u8Pin * 4) + 2);
-					CLR_BIT(GPIOB->CRL, (Copy_u8Pin * 4) + 3);
-				} else {
-					CLR_BIT(GPIOB->CRH, ((Copy_u8Pin * 4) - 32) + 2);
-					CLR_BIT(GPIOB->CRH, ((Copy_u8Pin * 4) - 32) + 3);
-				}
-				break;
-			case GPIO_u8_PORT_C:
-				if (Copy_u8Pin <= 7) {
-					CLR_BIT(GPIOC->CRL, (Copy_u8Pin * 4) + 2);
-					CLR_BIT(GPIOC->CRL, (Copy_u8Pin * 4) + 3);
-				} else {
-					CLR_BIT(GPIOC->CRH, ((Copy_u8Pin * 4) - 32) + 2);
-					CLR_BIT(GPIOC->CRH, ((Copy_u8Pin * 4) - 32) + 3);
-				}
-				break;
-			default:
-				LOC_u8ErrorState = STD_TYPES_NOK;
-				break;
-			}
-			break;
-
-		case GPIO_u8_OPEN_DRIAN:
-			switch (Copy_u8Port) {
-			case GPIO_u8_PORT_A:
-				if (Copy_u8Pin <= 7) {
-					SET_BIT(GPIOA->CRL, (Copy_u8Pin * 4) + 2);
-					CLR_BIT(GPIOA->CRL, (Copy_u8Pin * 4) + 3);
-				} else {
-					SET_BIT(GPIOA->CRH, ((Copy_u8Pin * 4) - 32) + 2);
-					CLR_BIT(GPIOA->CRH, ((Copy_u8Pin * 4) - 32) + 3);
-				}
-				break;
-			case GPIO_u8_PORT_B:
-				if (Copy_u8Pin <= 7) {
-					SET_BIT(GPIOB->CRL, (Copy_u8Pin * 4) + 2);
-					CLR_BIT(GPIOB->CRL, (Copy_u8Pin * 4) + 3);
-				} else {
-					SET_BIT(GPIOB->CRH, ((Copy_u8Pin * 4) - 32) + 2);
-					CLR_BIT(GPIOB->CRH, ((Copy_u8Pin * 4) - 32) + 3);
-				}
-				break;
-			case GPIO_u8_PORT_C:
-				if (Copy_u8Pin <= 7) {
-					SET_BIT(GPIOC->CRL, (Copy_u8Pin * 4) + 2);
-					CLR_BIT(GPIOC->CRL, (Copy_u8Pin * 4) + 3);
-				} else {
-					SET_BIT(GPIOC->CRH, ((Copy_u8Pin * 4) - 32) + 2);
-					CLR_BIT(GPIOC->CRH, ((Copy_u8Pin * 4) - 32) + 3);
-				}
-				break;
-			default:
-				LOC_u8ErrorState = STD_TYPES_NOK;
-				break;
-			}
-			break;
-
-		case GPIO_u8_ALTERNATE_PUSH_PULL:
-			switch (Copy_u8Port) {
-			case GPIO_u8_PORT_A:
-				if (Copy_u8Pin <= 7) {
-					CLR_BIT(GPIOA->CRL, (Copy_u8Pin * 4) + 2);
-					SET_BIT(GPIOA->CRL, (Copy_u8Pin * 4) + 3);
-				} else {
-					CLR_BIT(GPIOA->CRH, ((Copy_u8Pin * 4) - 32) + 2);
-					SET_BIT(GPIOA->CRH, ((Copy_u8Pin * 4) - 32) + 3);
-				}
-				break;
-			case GPIO_u8_PORT_B:
-				if (Copy_u8Pin <= 7) {
-					CLR_BIT(GPIOB->CRL, (Copy_u8Pin * 4) + 2);
-					SET_BIT(GPIOB->CRL, (Copy_u8Pin * 4) + 3);
-				} else {
-					CLR_BIT(GPIOB->CRH, ((Copy_u8Pin * 4) - 32) + 2);
-					SET_BIT(GPIOB->CRH, ((Copy_u8Pin * 4) - 32) + 3);
-				}
-				break;
-			case GPIO_u8_PORT_C:
-				if (Copy_u8Pin <= 7) {
-					CLR_BIT(GPIOC->CRL, (Copy_u8Pin * 4) + 2);
-					SET_BIT(GPIOC->CRL, (Copy_u8Pin * 4) + 3);
-				} else {
-					CLR_BIT(GPIOC->CRH, ((Copy_u8Pin * 4) - 32) + 2);
-					SET_BIT(GPIOC->CRH, ((Copy_u8Pin * 4) - 32) + 3);
-				}
-				break;
-			default:
-				LOC_u8ErrorState = STD_TYPES_NOK;
-				break;
-			}
-			break;
-
-		case GPIO_u8_ALTERNATE_OPEN_DRIAN:
-			switch (Copy_u8Port) {
-			case GPIO_u8_PORT_A:
-				if (Copy_u8Pin <= 7) {
-					SET_BIT(GPIOA->CRL, (Copy_u8Pin * 4) + 2);
-					SET_BIT(GPIOA->CRL, (Copy_u8Pin * 4) + 3);
-				} else {
-					SET_BIT(GPIOA->CRH, ((Copy_u8Pin * 4) - 32) + 2);
-					SET_BIT(GPIOA->CRH, ((Copy_u8Pin * 4) - 32) + 3);
-				}
-				break;
-			case GPIO_u8_PORT_B:
-				if (Copy_u8Pin <= 7) {
-					SET_BIT(GPIOB->CRL, (Copy_u8Pin * 4) + 2);
-					SET_BIT(GPIOB->CRL, (Copy_u8Pin * 4) + 3);
-				} else {
-					SET_BIT(GPIOB->CRH, ((Copy_u8Pin * 4) - 32) + 2);
-					SET_BIT(GPIOB->CRH, ((Copy_u8Pin * 4) - 32) + 3);
-				}
-				break;
-			case GPIO_u8_PORT_C:
-				if (Copy_u8Pin <= 7) {
-					SET_BIT(GPIOC->CRL, (Copy_u8Pin * 4) + 2);
-					SET_BIT(GPIOC->CRL, (Copy_u8Pin * 4) + 3);
-				} else {
-					SET_BIT(GPIOC->CRH, ((Copy_u8Pin * 4) - 32) + 2);
-					SET_BIT(GPIOC->CRH, ((Copy_u8Pin * 4) - 32) + 3);
-				}
-				break;
-			default:
-				LOC_u8ErrorState = STD_TYPES_NOK;
-				break;
-			}
-			break;
-
-		}
+	else{
+		LOC_u8ErrorState = STD_TYPES_NOK;
 	}
 	return LOC_u8ErrorState;
 }
 
-u8 GPIO_u8ReadPinValue(u8 Copy_u8Port, u8 Copy_u8Pin) {
+
+
+u8 GPIO_u8ReadPinValue(const GPIO_PIN_CONFIG_t * Copy_strPtrConfig , u8 * Copy_PtrResult){
 	u8 LOC_u8ErrorState = STD_TYPES_OK;
-	u8 LOC_u8Result = 0;
-	if (Copy_u8Pin < 16) {
-		switch (Copy_u8Port) {
-		case GPIO_u8_PORT_A:
-			LOC_u8Result = GET_BIT(GPIOA->IDR, Copy_u8Pin);
+	if (Copy_strPtrConfig != NULL){
+			if((Copy_strPtrConfig ->u8PortId <= GPIO_u8_PORT_C) && (Copy_strPtrConfig->u8PinId <= GPIO_u8_PIN_15)){
+				*Copy_PtrResult = GET_BIT(GPIO_arrPtr[Copy_strPtrConfig ->u8PortId]->IDR , Copy_strPtrConfig->u8PinId);
+			}
+			else{
+				LOC_u8ErrorState = STD_TYPES_NOK;
+			}
+	}
+	else{
+		LOC_u8ErrorState = STD_TYPES_NOK;
+	}
+
+	return LOC_u8ErrorState;
+}
+
+
+u8 GPIO_u8SetPinValue(const GPIO_PIN_CONFIG_t * Copy_strPtrConfig , u8 Copy_u8Operation){
+	u8 LOC_u8ErrorState = STD_TYPES_OK;
+	if (Copy_strPtrConfig != NULL){
+			if((Copy_strPtrConfig ->u8PortId <= GPIO_u8_PORT_C) && (Copy_strPtrConfig->u8PinId <= GPIO_u8_PIN_15)){
+				switch (Copy_u8Operation){
+				case GPIO_u8_HIGH:
+					GPIO_arrPtr[Copy_strPtrConfig->u8PortId]->BSRR = (1<<Copy_strPtrConfig->u8PinId);
+					break;
+
+				case GPIO_u8_LOW:
+					GPIO_arrPtr[Copy_strPtrConfig->u8PortId]->BRR = (1<<Copy_strPtrConfig->u8PinId);
+					break;
+
+				default:
+					LOC_u8ErrorState = STD_TYPES_NOK;
+					break;
+				}
+			}
+			else{
+				LOC_u8ErrorState = STD_TYPES_NOK;
+			}
+	}
+	else{
+		LOC_u8ErrorState = STD_TYPES_NOK;
+	}
+
+	return LOC_u8ErrorState;
+}
+
+u8 GPIO_u8TogPin(const GPIO_PIN_CONFIG_t * Copy_strPtrConfig){
+	u8 LOC_u8ErrorState = STD_TYPES_OK;
+	if (Copy_strPtrConfig != NULL){
+			if((Copy_strPtrConfig ->u8PortId <= GPIO_u8_PORT_C) && (Copy_strPtrConfig->u8PinId <= GPIO_u8_PIN_15)){
+				TOGGEL_BIT(GPIO_arrPtr[Copy_strPtrConfig->u8PortId]->ODR , Copy_strPtrConfig->u8PinId);
+			}
+			else{
+				LOC_u8ErrorState = STD_TYPES_NOK;
+			}
+	}
+	else{
+		LOC_u8ErrorState = STD_TYPES_NOK;
+	}
+	return LOC_u8ErrorState;
+}
+
+
+u8 GPIO_u8PortMode(u8 Copy_u8Port , u8 Copy_u8PortMode){
+	u8 LOC_u8ErrorState = STD_TYPES_OK;
+	if(Copy_u8Port <= GPIO_u8_PORT_C){
+		GPIO_arrPtr[Copy_u8Port]->CRL = Copy_u8PortMode;
+		GPIO_arrPtr[Copy_u8Port]->CRH = Copy_u8PortMode;
+	}
+	else{
+		LOC_u8ErrorState = STD_TYPES_NOK;
+	}
+	return LOC_u8ErrorState;
+}
+u8 GPIO_SetPortValue(u8 Copy_u8Port , u8 Copy_u8Operation){
+	u8 LOC_u8ErrorState = STD_TYPES_OK;
+	if(Copy_u8Port <= GPIO_u8_PORT_C){
+		switch (Copy_u8Operation){
+		case GPIO_u8_HIGH:
+			GPIO_arrPtr[Copy_u8Port]->BSRR = 0xFFFF;
 			break;
-		case GPIO_u8_PORT_B:
-			LOC_u8Result = GET_BIT(GPIOB->IDR, Copy_u8Pin);
+
+		case GPIO_u8_LOW:
+			GPIO_arrPtr[Copy_u8Port]->BRR = 0xFFFF;
 			break;
-		case GPIO_u8_PORT_C:
-			LOC_u8Result = GET_BIT(GPIOC->IDR, Copy_u8Pin);
-			break;
+
 		default:
 			LOC_u8ErrorState = STD_TYPES_NOK;
 			break;
 		}
-	} else {
-		LOC_u8ErrorState = STD_TYPES_NOK;
 	}
-	return LOC_u8Result;
-}
-
-u8 GPIO_u8SetPinValue(u8 Copy_u8Port, u8 Copy_u8Pin, u8 Copy_u8Operation) {
-	u8 LOC_u8ErrorState = STD_TYPES_OK;
-	if (Copy_u8Pin < 16) {
-		if (Copy_u8Operation == GPIO_u8_SET) {
-			switch (Copy_u8Port) {
-			case GPIO_u8_PORT_A:
-				GPIOA->BSRR = (1 << Copy_u8Pin);
-				break;
-			case GPIO_u8_PORT_B:
-				GPIOB->BSRR = (1 << Copy_u8Pin);
-				break;
-			case GPIO_u8_PORT_C:
-				GPIOC->BSRR = (1 << Copy_u8Pin);
-				break;
-			default:
-				LOC_u8ErrorState = STD_TYPES_NOK;
-				break;
-			}
-		} else if (Copy_u8Operation == GPIO_u8_RESET) {
-			switch (Copy_u8Port) {
-			case GPIO_u8_PORT_A:
-				GPIOA->BRR = (1 << Copy_u8Pin);
-				break;
-			case GPIO_u8_PORT_B:
-				GPIOB->BRR = (1 << Copy_u8Pin);
-				break;
-			case GPIO_u8_PORT_C:
-				GPIOC->BRR = (1 << Copy_u8Pin);
-				break;
-			default:
-				LOC_u8ErrorState = STD_TYPES_NOK;
-				break;
-			}
-		} else {
-			LOC_u8ErrorState = STD_TYPES_NOK;
-		}
+	else{
+		LOC_u8ErrorState = STD_TYPES_NOK;
 	}
 	return LOC_u8ErrorState;
 }
+
+
+u8 GPIO_ReadPortValue(u8 Copy_u8Port , u32 * Copy_ptrResult){
+	u8 LOC_u8ErrorState = STD_TYPES_OK;
+	if(Copy_u8Port <= GPIO_u8_PORT_C){
+		* Copy_ptrResult = GPIO_arrPtr[Copy_u8Port]->IDR;
+	}
+	else{
+		LOC_u8ErrorState = STD_TYPES_NOK;
+	}
+	return LOC_u8ErrorState;
+}
+
+
+
+

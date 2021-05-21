@@ -8,13 +8,4 @@
 #ifndef _GPIO_CONFIG_H
 #define _GPIO_CONFIG_H
 
-/***********OUTPUT SPEED***********
- * 								  *
- *  Options : 1- GPIO_u8_10MHZ	  *
- * 			  2- GPIO_u8_2MHZ	  *
- * 			  3- GPIO_u8_50MHZ    *
- **********************************/
-
-#define GPIO_u8_MAX_OUTPUT_SPEED	GPIO_u8_10MHZ
-
 #endif
