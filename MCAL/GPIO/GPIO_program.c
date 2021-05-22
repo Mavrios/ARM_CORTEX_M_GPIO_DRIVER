@@ -113,18 +113,18 @@ u8 GPIO_u8TogPin(const GPIO_PIN_CONFIG_t * Copy_strPtrConfig){
 }
 
 
-u8 GPIO_u8PortMode(u8 Copy_u8Port , u8 Copy_u8PortMode){
+u8 GPIO_u8PortMode(u8 Copy_u8Port , u32 Copy_u32PortMode){
 	u8 LOC_u8ErrorState = STD_TYPES_OK;
 	if(Copy_u8Port <= GPIO_u8_PORT_C){
-		GPIO_arrPtr[Copy_u8Port]->CRL = Copy_u8PortMode;
-		GPIO_arrPtr[Copy_u8Port]->CRH = Copy_u8PortMode;
+		GPIO_arrPtr[Copy_u8Port]->CRL = Copy_u32PortMode;
+		GPIO_arrPtr[Copy_u8Port]->CRH = Copy_u32PortMode;
 	}
 	else{
 		LOC_u8ErrorState = STD_TYPES_NOK;
 	}
 	return LOC_u8ErrorState;
 }
-u8 GPIO_SetPortValue(u8 Copy_u8Port , u8 Copy_u8Operation){
+u8 GPIO_u8SetPortValue(u8 Copy_u8Port , u8 Copy_u8Operation){
 	u8 LOC_u8ErrorState = STD_TYPES_OK;
 	if(Copy_u8Port <= GPIO_u8_PORT_C){
 		switch (Copy_u8Operation){
@@ -148,7 +148,7 @@ u8 GPIO_SetPortValue(u8 Copy_u8Port , u8 Copy_u8Operation){
 }
 
 
-u8 GPIO_ReadPortValue(u8 Copy_u8Port , u32 * Copy_ptrResult){
+u8 GPIO_u8ReadPortValue(u8 Copy_u8Port , u32 * Copy_ptrResult){
 	u8 LOC_u8ErrorState = STD_TYPES_OK;
 	if(Copy_u8Port <= GPIO_u8_PORT_C){
 		* Copy_ptrResult = GPIO_arrPtr[Copy_u8Port]->IDR;

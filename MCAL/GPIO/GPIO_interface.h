@@ -29,43 +29,43 @@ typedef struct{
 #define GPIO_u8_OUTPUT_GP_PP_SPEED_10MHZ    0b0001
 #define GPIO_u8_OUTPUT_GP_OD_SPEED_10MHZ    0b0101
 #define GPIO_u8_OUTPUT_AF_PP_SPEED_10MHZ    0b1001
-#define GPIO_u8_OUTPUT_AF_PP_SPEED_10MHZ    0b1101
+#define GPIO_u8_OUTPUT_AF_OD_SPEED_10MHZ    0b1101
 /************************     2 MHZ SPEED     ***********************/
 #define GPIO_u8_OUTPUT_GP_PP_SPEED_2MHZ     0b0010
 #define GPIO_u8_OUTPUT_GP_OD_SPEED_2MHZ     0b0110
 #define GPIO_u8_OUTPUT_AF_PP_SPEED_2MHZ     0b1010
-#define GPIO_u8_OUTPUT_AF_PP_SPEED_2MHZ     0b1110
+#define GPIO_u8_OUTPUT_AF_OD_SPEED_2MHZ     0b1110
 /************************     50 MHZ SPEED     ***********************/
 #define GPIO_u8_OUTPUT_GP_PP_SPEED_50MHZ    0b0011
 #define GPIO_u8_OUTPUT_GP_OD_SPEED_50MHZ    0b0111
 #define GPIO_u8_OUTPUT_AF_PP_SPEED_50MHZ    0b1011
-#define GPIO_u8_OUTPUT_AF_PP_SPEED_50MHZ    0b1111
+#define GPIO_u8_OUTPUT_AF_OD_SPEED_50MHZ    0b1111
 
 
 /*********************************************************************
 **************************     PORT MODES     *************************
 **********************************************************************/
 /************************     INPUT MODES     ************************/
-#define GPIO_u8_PORT_INPUT_ANALOG                0x00000000
-#define GPIO_u8_PORT_INPUT_FLOATING              0x44444444
-#define GPIO_u8_PORT_INPUT_PULL_DOWN             0x88888888
-#define GPIO_u8_PORT_INPUT_PULL_UP               0x88888889
+#define GPIO_u32_PORT_INPUT_ANALOG                0x00000000
+#define GPIO_u32_PORT_INPUT_FLOATING              0x44444444
+#define GPIO_u32_PORT_INPUT_PULL_DOWN             0x88888888
+#define GPIO_u32_PORT_INPUT_PULL_UP               0x88888889
 /************************     OUTPUT MODES     ***********************/
 /************************     10 MHZ SPEED     ***********************/
-#define GPIO_u8_PORT_OUTPUT_GP_PP_SPEED_10MHZ    0x11111111
-#define GPIO_u8_PORT_OUTPUT_GP_OD_SPEED_10MHZ    0x55555555
-#define GPIO_u8_PORT_OUTPUT_AF_PP_SPEED_10MHZ    0x99999999
-#define GPIO_u8_PORT_OUTPUT_AF_PP_SPEED_10MHZ    0xDDDDDDDD
+#define GPIO_u32_PORT_OUTPUT_GP_PP_SPEED_10MHZ    0x11111111
+#define GPIO_u32_PORT_OUTPUT_GP_OD_SPEED_10MHZ    0x55555555
+#define GPIO_u32_PORT_OUTPUT_AF_PP_SPEED_10MHZ    0x99999999
+#define GPIO_u32_PORT_OUTPUT_AF_OD_SPEED_10MHZ    0xDDDDDDDD
 /************************     2 MHZ SPEED     ***********************/
-#define GPIO_u8_PORT_OUTPUT_GP_PP_SPEED_2MHZ     0x22222222
-#define GPIO_u8_PORT_OUTPUT_GP_OD_SPEED_2MHZ     0x66666666
-#define GPIO_u8_PORT_OUTPUT_AF_PP_SPEED_2MHZ     0xAAAAAAAA
-#define GPIO_u8_PORT_OUTPUT_AF_PP_SPEED_2MHZ     0xEEEEEEEE
+#define GPIO_u32_PORT_OUTPUT_GP_PP_SPEED_2MHZ     0x22222222
+#define GPIO_u32_PORT_OUTPUT_GP_OD_SPEED_2MHZ     0x66666666
+#define GPIO_u32_PORT_OUTPUT_AF_PP_SPEED_2MHZ     0xAAAAAAAA
+#define GPIO_u32_PORT_OUTPUT_AF_OD_SPEED_2MHZ     0xEEEEEEEE
 /************************     50 MHZ SPEED     ***********************/
-#define GPIO_u8_PORT_OUTPUT_GP_PP_SPEED_50MHZ    0x33333333
-#define GPIO_u8_PORT_OUTPUT_GP_OD_SPEED_50MHZ    0x77777777
-#define GPIO_u8_PORT_OUTPUT_AF_PP_SPEED_50MHZ    0xBBBBBBBB
-#define GPIO_u8_PORT_OUTPUT_AF_PP_SPEED_50MHZ    0xFFFFFFFF
+#define GPIO_u32_PORT_OUTPUT_GP_PP_SPEED_50MHZ    0x33333333
+#define GPIO_u32_PORT_OUTPUT_GP_OD_SPEED_50MHZ    0x77777777
+#define GPIO_u32_PORT_OUTPUT_AF_PP_SPEED_50MHZ    0xBBBBBBBB
+#define GPIO_u32_PORT_OUTPUT_AF_OD_SPEED_50MHZ    0xFFFFFFFF
 /*********************************************************************
 *************************     GPIO PORTS     *************************
 **********************************************************************/
@@ -111,8 +111,8 @@ u8 GPIO_u8PinMode(const GPIO_PIN_CONFIG_t * Copy_strPtrConfig);
 u8 GPIO_u8ReadPinValue(const GPIO_PIN_CONFIG_t * Copy_strPtrConfig , u8 * Copy_PtrResult);
 u8 GPIO_u8SetPinValue(const GPIO_PIN_CONFIG_t * Copy_strPtrConfig , u8 Copy_u8Operation);
 u8 GPIO_u8TogPin(const GPIO_PIN_CONFIG_t * Copy_strPtrConfig);
-u8 GPIO_u8PortMode(u8 Copy_u8Port , u8 Copy_u8PortMode);
-u8 GPIO_SetPortValue(u8 Copy_u8Port , u8 Copy_u8Operation);
-u8 GPIO_ReadPortValue(u8 Copy_u8Port , u32 * Copy_ptrResult);
+u8 GPIO_u8PortMode(u8 Copy_u8Port , u32 Copy_u32PortMode);
+u8 GPIO_u8SetPortValue(u8 Copy_u8Port , u8 Copy_u8Operation);
+u8 GPIO_u8ReadPortValue(u8 Copy_u8Port , u32 * Copy_ptrResult);
 
 #endif
